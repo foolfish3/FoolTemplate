@@ -679,7 +679,8 @@ RESTART:    if($token_str){
     protected $splitters_map;
     protected function setup_splitters($addition_splitters){
         $splitters=array(
-            "**","++","--",">>","<<",
+			"=>",//foreach
+			"**","++","--",">>","<<",
             ">=", "<=","==","!=","===","!==","<>","<=>",
             "??","?:",
             "+=","-=","*=","**=","/=",".=","%=","&=","|=","^=","<<=",">>=",
