@@ -1,6 +1,7 @@
 {
     "name": "foolfish3/fooltemplate",
-    "description": "a easy to use php template engine",
+	"description": "a easy to use php template engine",
+	"license": "MIT",
     "require": {
         "php": ">=5.5"
 	},
