@@ -33,7 +33,8 @@ class PhpTokenizer{
             case 11006: return "T_STRING_FUNCTION";
         }
         return token_name($code);
-    }
+	}
+	
     public static function join_tokens($tokens){
         foreach($tokens as &$token){
             if(\is_array($token)){
@@ -41,7 +42,8 @@ class PhpTokenizer{
             }
         }
         return \implode($tokens);
-    }
+	}
+	
     public static function dump_tokens($tokens,$return=false){
         $s="";
         foreach($tokens as $k => &$token){
@@ -58,12 +60,8 @@ class PhpTokenizer{
     }
 
 	public static function is_digit($char){
-		switch($char){
-			case '0':case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':
-				return true;
-			default:
-				return false;
-		}
+		static $map=array(0=>1,1=>1,2=>1,3=>1,4=>1,5=>1,6=>1,7=>1,8=>1,9=>1);
+		return isset($map[$char]);
     }
 
 	public static function is_valid_name_char($char){
