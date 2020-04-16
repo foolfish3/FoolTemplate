@@ -7,19 +7,19 @@ class PhpTokenizer{
         $this->setup_splitters(array("?>"));
     }
 
-    public const T_VARIABLE_STATIC_PROPERTY=10001;
-    public const T_VARIABLE_FUNCTION=10002;
+    const T_VARIABLE_STATIC_PROPERTY=10001;
+    const T_VARIABLE_FUNCTION=10002;
     //public const T_VARIABLE_CLASS=10003;
 
-    public const T_STRING_CLASS_NAME=11001;
-    public const T_STRING_CLASS_CONSTANT=11002;
-    public const T_STRING_CLASS_PROPERTY=11003;
-    public const T_STRING_CLASS_STATIC_METHOD=11004;
-    public const T_STRING_CLASS_METHOD=11005;
-    public const T_STRING_FUNCTION=11006;
+    const T_STRING_CLASS_NAME=11001;
+    const T_STRING_CLASS_CONSTANT=11002;
+    const T_STRING_CLASS_PROPERTY=11003;
+    const T_STRING_CLASS_STATIC_METHOD=11004;
+    const T_STRING_CLASS_METHOD=11005;
+    const T_STRING_FUNCTION=11006;
 
-    public const T_OPEN_TAG=12001;
-    public const T_CLOSE_TAG=12002;
+    const T_OPEN_TAG=12001;
+    const T_CLOSE_TAG=12002;
     public static function token_name($code){
         switch($code){
             case 10001: return "T_VARIABLE_STATIC_PROPERTY";

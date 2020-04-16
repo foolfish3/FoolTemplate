@@ -1,5 +1,6 @@
 <?php
 namespace FoolTemplate;
+
 class FoolTemplateTokenizer extends PhpTokenizer{
 
     public function __construct(){

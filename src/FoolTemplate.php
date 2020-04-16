@@ -334,7 +334,7 @@ class FoolTemplate {
 		return eval($this->compile(func_get_arg(0),"expr"));
 	}
 
-	public function eval(){
+	public function doeval(){
 		return eval($this->compile(func_get_arg(0),"eval"));
 	}
 
