@@ -62,7 +62,7 @@ class FoolTemplate {
 						if(\strpos($func,"\\")!==false){
 							throw new \ErrorException("function name {$token[1]} error");
 						}
-						if(@$token[$index+2]==")"){
+						if(@$tokens[$index+2]==")"){
 							$ss[]="\$this->callfunc(".\var_export($token[1],true);
 						}else{
 							$ss[]="\$this->callfunc(".\var_export($token[1],true).",";
