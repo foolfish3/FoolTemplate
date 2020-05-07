@@ -257,7 +257,7 @@ class PhpTokenizer
                     break;
                 case 4: //8进制状态 0888
                     $case = isset($map[$c]) ? $map[$c] : -1;
-                    switch ($map[$c]) {
+                    switch ($case) {
                         case 8:
                         case 9:
                             if ($oct_error === NULL) {
@@ -295,7 +295,7 @@ class PhpTokenizer
                     break;
                 case 5: //0x~
                     $case = isset($map[$c]) ? $map[$c] : -1;
-                    switch ($map[$c]) {
+                    switch ($case) {
                         case 0:
                         case 1:
                         case 2:
@@ -328,7 +328,7 @@ class PhpTokenizer
                     break;
                 case 6: //0b~
                     $case = isset($map[$c]) ? $map[$c] : -1;
-                    switch ($map[$c]) {
+                    switch ($case) {
                         case 0:
                         case 1:
                             $s .= $c;
@@ -347,7 +347,7 @@ class PhpTokenizer
                     break;
                 case 7: //0E
                     $case = isset($map[$c]) ? $map[$c] : -1;
-                    switch ($map[$c]) {
+                    switch ($case) {
                         case 0:
                         case 1:
                         case 2:
@@ -381,7 +381,7 @@ class PhpTokenizer
                     $is_float = true;
                     $oct_error = NULL;
                     $case = isset($map[$c]) ? $map[$c] : -1;
-                    switch ($map[$c]) {
+                    switch ($case) {
                         case 0:
                         case 1:
                         case 2:
@@ -409,7 +409,7 @@ class PhpTokenizer
                     break;
                 case 9: //0xA~
                     $case = isset($map[$c]) ? $map[$c] : -1;
-                    switch ($map[$c]) {
+                    switch ($case) {
                         case 0:
                         case 1:
                         case 2:
@@ -439,7 +439,7 @@ class PhpTokenizer
                     break;
                 case 10: //0x0
                     $case = isset($map[$c]) ? $map[$c] : -1;
-                    switch ($map[$c]) {
+                    switch ($case) {
                         case 0:
                         case 1:
                             $s .= $c;
@@ -456,7 +456,7 @@ class PhpTokenizer
                 case 11: //0E1
                     $is_float = true;
                     $case = isset($map[$c]) ? $map[$c] : -1;
-                    switch ($map[$c]) {
+                    switch ($case) {
                         case 0:
                         case 1:
                         case 2:
@@ -480,7 +480,7 @@ class PhpTokenizer
                     break;
                 case 12: //0E+
                     $case = isset($map[$c]) ? $map[$c] : -1;
-                    switch ($map[$c]) {
+                    switch ($case) {
                         case 0:
                         case 1:
                         case 2:
