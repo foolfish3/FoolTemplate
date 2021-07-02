@@ -110,7 +110,6 @@ class PhpTokenizer
     }
 
     //start with [0-9\\.]
-    //0
     public static function get_next_number($str, $index, $throw_error)
     {
         static $map = array(
@@ -119,13 +118,13 @@ class PhpTokenizer
             "" => 16, "." => 17,
             "X" => 18, "x" => 18,
             "+" => 19, "-" => 20,
-            "DEFAULT" => -1,
         );
         $error = NULL;
+        $oct_error = NULL;
         $is_float = false;
         $s = "";
         $state = 0;
-        $c = @$str[$index];
+        $c = @$str[$old_index = $index];
         for (;;) {
             switch ($state) {
                 case 0:
@@ -146,6 +145,10 @@ class PhpTokenizer
                             $s .= $c;
                             $state = 2;
                             break;
+                        case 17: //.
+                            $s .= $c;
+                            $state = 3;
+                            break;
                         default:
                             throw new \ErrorException("BUG");
                     }
@@ -154,6 +157,32 @@ class PhpTokenizer
                 case 1: //0~
                     $case = isset($map[$c]) ? $map[$c] : -1;
                     switch ($case) {
+                        case 8:
+                        case 9:
+                            if ($oct_error === NULL) {
+                                $oct_error = "invalid char after number $s";
+                                $oct_index = $index;
+                                $oct_s = $s;
+                            }
+                        case 0:
+                        case 1:
+                        case 2:
+                        case 3:
+                        case 4:
+                        case 5:
+                        case 6:
+                        case 7:
+                            $s .= $c;
+                            $state = 4;
+                            break;
+                        case 18: //X
+                            $s .= $c;
+                            $state = 5;
+                            break;
+                        case 11: //B
+                            $s .= $c;
+                            $state = 6;
+                            break;
                         case 14: //E
                             $s .= $c;
                             $state = 7;
@@ -203,6 +232,117 @@ class PhpTokenizer
                     }
                     $c = @$str[++$index];
                     break;
+                case 3: //.~
+                    $case = isset($map[$c]) ? $map[$c] : -1;
+                    switch ($case) {
+                        case 0:
+                        case 1:
+                        case 2:
+                        case 3:
+                        case 4:
+                        case 5:
+                        case 6:
+                        case 7:
+                        case 8:
+                        case 9:
+                            $s .= $c;
+                            $state = 8;
+                            break;
+                        case 16: // ''
+                        default:
+                            return array(false, $old_index);
+                    }
+                    $c = @$str[++$index];
+                    break;
+                case 4: //8进制状态 0888
+                    $case = isset($map[$c]) ? $map[$c] : -1;
+                    switch ($case) {
+                        case 8:
+                        case 9:
+                            if ($oct_error === NULL) {
+                                $oct_error = "invalid char after number $s";
+                                $oct_index = $index;
+                                $oct_s = $s;
+                            }
+                        case 0:
+                        case 1:
+                        case 2:
+                        case 3:
+                        case 4:
+                        case 5:
+                        case 6:
+                        case 7:
+                            $s .= $c;
+                            break;
+                        case 14:
+                            $s .= $c;
+                            $state = 7;
+                            break;
+                        case 17:
+                            $s .= $c;
+                            $state = 8;
+                            break;
+                        case 16: // ''
+                        default:
+                            if ($c !== '' && self::is_valid_name_char($c)) {
+                                $error = "invalid char after number $s";
+                            }
+                            break 3;
+                    }
+                    $c = @$str[++$index];
+                    break;
+                case 5: //0x~
+                    $case = isset($map[$c]) ? $map[$c] : -1;
+                    switch ($case) {
+                        case 0:
+                        case 1:
+                        case 2:
+                        case 3:
+                        case 4:
+                        case 5:
+                        case 6:
+                        case 7:
+                        case 8:
+                        case 9:
+                        case 10:
+                        case 11:
+                        case 12:
+                        case 13:
+                        case 14:
+                        case 15:
+                            $s .= $c;
+                            $state = 9;
+                            break;
+                        case 16: // ''
+                        default:
+                            $index--;
+                            $s = \substr($s, 0, -1);
+                            if ($c !== '' && self::is_valid_name_char($c)) {
+                                $error = "invalid char after number $s";
+                            }
+                            break 3;
+                    }
+                    $c = @$str[++$index];
+                    break;
+                case 6: //0b~
+                    $case = isset($map[$c]) ? $map[$c] : -1;
+                    switch ($case) {
+                        case 0:
+                        case 1:
+                            $s .= $c;
+                            $state = 10;
+                            break;
+                        case 16:
+                        default:
+                            $index--;
+                            $s = \substr($s, 0, -1);
+                            if ($c !== '' && self::is_valid_name_char($c)) {
+                                $error = "invalid char after number $s";
+                            }
+                            break 3;
+                    }
+                    $c = @$str[++$index];
+                    break;
                 case 7: //0E
                     $case = isset($map[$c]) ? $map[$c] : -1;
                     switch ($case) {
@@ -237,6 +377,7 @@ class PhpTokenizer
                     break;
                 case 8: //1.
                     $is_float = true;
+                    $oct_error = NULL;
                     $case = isset($map[$c]) ? $map[$c] : -1;
                     switch ($case) {
                         case 0:
@@ -254,6 +395,52 @@ class PhpTokenizer
                         case 14:
                             $s .= $c;
                             $state = 7;
+                            break;
+                        case 16: // ''
+                        default:
+                            if ($c !== '' && self::is_valid_name_char($c)) {
+                                $error = "invalid char after number $s";
+                            }
+                            break 3;
+                    }
+                    $c = @$str[++$index];
+                    break;
+                case 9: //0xA~
+                    $case = isset($map[$c]) ? $map[$c] : -1;
+                    switch ($case) {
+                        case 0:
+                        case 1:
+                        case 2:
+                        case 3:
+                        case 4:
+                        case 5:
+                        case 6:
+                        case 7:
+                        case 8:
+                        case 9:
+                        case 10:
+                        case 11:
+                        case 12:
+                        case 13:
+                        case 14:
+                        case 15:
+                            $s .= $c;
+                            break;
+                        case 16: // ''
+                        default:
+                            if ($c !== '' && self::is_valid_name_char($c)) {
+                                $error = "invalid char after number $s";
+                            }
+                            break 3;
+                    }
+                    $c = @$str[++$index];
+                    break;
+                case 10: //0x0
+                    $case = isset($map[$c]) ? $map[$c] : -1;
+                    switch ($case) {
+                        case 0:
+                        case 1:
+                            $s .= $c;
                             break;
                         case 16: // ''
                         default:
@@ -320,6 +507,12 @@ class PhpTokenizer
                     throw new \ErrorException("BUG");
             }
         }
+        if ($oct_error) {
+            if ($throw_error) {
+                throw new \ErrorException($oct_error);
+            }
+            return array(array(T_LNUMBER, $oct_s, $oct_error), $oct_index);
+        }
         if ($throw_error && $error !== NULL) {
             throw new \ErrorException($error);
         }
@@ -364,10 +557,10 @@ class PhpTokenizer
         if (@$str[$index] === "/" && @$str[$index + 1] === "*") {
             $s = $str[$index]; // /
             $s .= $str[++$index]; // *
-            $c = @$str[++$index];
+            $c = $str[++$index];
             for (;;) {
                 if ($c === "*" && @$str[$index + 1] === "/") {
-                    $s .= $c; // *
+                    $s .= $str[++$index]; // *
                     $s .= $str[++$index]; // /
                     $index++;
                     break;
@@ -400,7 +593,8 @@ class PhpTokenizer
     public static function get_next_whitespace($str, $index)
     {
         static $map = array(" " => 1, "\r" => 1, "\n" => 1, "\t" => 1);
-        $s = $c = $str[$index];
+        $s = "";
+        $c = $str[$index];
         for (;;) {
             if (isset($map[$c])) {
                 $s .= $c;
@@ -494,12 +688,12 @@ class PhpTokenizer
 
     public static function get_next_open_tag($str, $index)
     {
-        if (\substr_compare($str, "<?", $index) === 0) {
+        if (\substr_compare($str, "<?", $index,2) !== 0) {
             return array(false, $index);
         }
-        if (\substr_compare($str, "<?=", $index) == 0) {
+        if (\substr_compare($str, "<?=", $index,3) == 0) {
             return array(array(T_OPEN_TAG, "<?=", NULL), $index + 3);
-        } elseif (\substr_compare($str, "<?php", $index, null, true)) {
+        } elseif (\substr_compare($str, "<?php", $index, 5, true) == 0) {
             return array(array(T_OPEN_TAG, \substr($str, $index, 5), NULL), $index + 5);
         } else {
             return array(array(T_OPEN_TAG, "<?", NULL), $index + 2);
@@ -729,7 +923,7 @@ class PhpTokenizer
                 list($token, $index) = self::get_next_quote($str, $index, $throw_error);
                 break;
             case 2:
-                list($token, $index) = self::get_next_comment($str, $index, $throw_error);
+                list($token, $index) = self::get_next_comment($str, $index);
                 break;
             case 3:
                 list($token, $index) = self::get_next_variable($str, $index, $throw_error);
@@ -738,7 +932,7 @@ class PhpTokenizer
                 list($token, $index) = self::get_next_number($str, $index, $throw_error);
                 break;
             case 5:
-                list($token, $index) = self::get_next_whitespace($str, $index, $throw_error);
+                list($token, $index) = self::get_next_whitespace($str, $index);
                 break;
             case 6:
                 return array(false, $index); //END
